@@ -1,5 +1,4 @@
 import { RPCHandler } from "@orpc/server/message-port";
-import { GUIDE_PAGE_PATH } from "@/constants/onboarding";
 import { ORPC_PORT_NAME } from "@/shared/orpc/constants";
 import { router } from "@/shared/orpc/router";
 
@@ -17,14 +16,6 @@ export default defineBackground(() => {
       return;
     }
     handler.upgrade(port);
-  });
-
-  browser.runtime.onInstalled.addListener((details) => {
-    if (details.reason !== "install") return;
-    const url = browser.runtime.getURL(GUIDE_PAGE_PATH);
-    browser.tabs.create({ url }).catch((error) => {
-      console.warn("[Guide] failed to open welcome page", error);
-    });
   });
 
   console.log("oRPC background ready", { id: browser.runtime.id });

@@ -1,2 +1,2 @@
-appName: chrome-extension-starter
-appDescription: 使用 oRPC + React Query 进行通信。
+appName: window resizer plus
+appDescription: 通过简洁弹窗快速调整浏览器窗口，支持自定义尺寸、比例与位置，并可保存常用预设。
