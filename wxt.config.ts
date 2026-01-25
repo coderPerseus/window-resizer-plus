@@ -25,6 +25,9 @@ export default defineConfig({
     name: "__MSG_appName__",
     description: "__MSG_appDescription__",
     default_locale: "en",
-    permissions: ["storage"],
+    permissions: ["storage", "windows", "system.display"],
+    action: {
+      default_title: "__MSG_appName__",
+    },
   },
 });
