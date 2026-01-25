@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0](https://github.com/coderPerseus/window-resizer-plus/compare/wxt-react-starter-v1.2.0...wxt-react-starter-v1.3.0) (2026-01-25)
+
+
+### Features
+
+* 单例窗口逻辑 ([403f653](https://github.com/coderPerseus/window-resizer-plus/commit/403f653d99a99747fc02645b95ef29961520e4c1))
+* 完工 ([d0065b3](https://github.com/coderPerseus/window-resizer-plus/commit/d0065b364dd89118d789756599d01c0f04b89d8b))
+* 核心能力开发 ([0911714](https://github.com/coderPerseus/window-resizer-plus/commit/0911714653bf9b0ee2e2cd6c6752252f144ab543))
+
 ## [1.2.0](https://github.com/coderPerseus/chrome-extension-starter/compare/wxt-react-starter-v1.1.0...wxt-react-starter-v1.2.0) (2026-01-24)
 
 
