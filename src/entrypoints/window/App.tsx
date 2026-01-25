@@ -34,6 +34,8 @@ type StatusState = {
 
 type Language = "zh" | "en";
 
+const CLOSE_ON_APPLY_KEY = "closeOnApply";
+
 const ratioOptionDefinitions: RatioOptionDefinition[] = [
   { value: "free", ratio: null, labelKey: "free" },
   { value: "1:1", ratio: 1 },
@@ -83,6 +85,11 @@ const translations = {
       toEnglish: "切换到英文",
       toChinese: "切换到中文",
     },
+    closeOnApply: {
+      title: "应用后关闭",
+      description: "点击应用后自动关闭此窗口",
+      ariaLabel: "应用后自动关闭调整窗口",
+    },
   },
   en: {
     buttons: {
@@ -116,6 +123,11 @@ const translations = {
       labelChinese: "ZH",
       toEnglish: "Switch to English",
       toChinese: "Switch to Chinese",
+    },
+    closeOnApply: {
+      title: "Close on apply",
+      description: "Automatically close this window after applying",
+      ariaLabel: "Automatically close the resize window after applying",
     },
   },
 } as const;
@@ -221,6 +233,7 @@ function App() {
     }
   });
   const [status, setStatus] = useState<StatusState>(null);
+  const [closeOnApply, setCloseOnApply] = useState(true);
   const [targetWindowId] = useState<number | null>(() => {
     const params = new URLSearchParams(window.location.search);
     const idParam = params.get("targetWindowId");
@@ -233,6 +246,25 @@ function App() {
     () => /(Mac|iPhone|iPad|iPod)/i.test(navigator.platform),
     [],
   );
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        if (!browser?.storage?.local) return;
+        const stored = await browser.storage.local.get(CLOSE_ON_APPLY_KEY);
+        const value = stored[CLOSE_ON_APPLY_KEY];
+        if (!active) return;
+        if (typeof value === "boolean") setCloseOnApply(value);
+      } catch (error) {
+        console.warn("Failed to load close-on-apply config", error);
+      }
+    };
+    void load();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const customRatioValue = useMemo(() => {
     const width = Number(customRatioWidth);
@@ -481,6 +513,39 @@ function App() {
           systemSize: formatSize(systemRect),
         },
       });
+      if (closeOnApply) {
+        try {
+          const currentTab = await browser?.tabs?.getCurrent?.();
+          if (currentTab?.id !== undefined && browser?.tabs?.remove) {
+            await browser.tabs.remove(currentTab.id);
+            return;
+          }
+        } catch (error) {
+          console.warn("Failed to close current tab", error);
+        }
+
+        try {
+          const currentWindow = await browser?.windows?.getCurrent?.();
+          if (
+            currentWindow?.id !== undefined &&
+            browser?.windows?.remove &&
+            currentWindow.id !== targetWindowId &&
+            currentWindow.type &&
+            currentWindow.type !== "normal"
+          ) {
+            await browser.windows.remove(currentWindow.id);
+            return;
+          }
+        } catch (error) {
+          console.warn("Failed to close current window", error);
+        }
+
+        try {
+          window.close();
+        } catch (error) {
+          console.warn("Failed to close popup", error);
+        }
+      }
     } catch (error) {
       console.warn("Failed to apply window size", error);
       setStatus({ key: "applyFailed" });
@@ -496,8 +561,36 @@ function App() {
   const languageToggleAriaLabel =
     language === "zh" ? t.languageToggle.toEnglish : t.languageToggle.toChinese;
 
+  const handleCloseToggle = (next: boolean) => {
+    setCloseOnApply(next);
+    void browser?.storage?.local
+      ?.set({ [CLOSE_ON_APPLY_KEY]: next })
+      .catch((error) => {
+        console.warn("Failed to persist close-on-apply config", error);
+      });
+  };
+
   return (
     <div className="app">
+      <div
+        className="close-toggle"
+        role="group"
+        aria-label={t.closeOnApply.ariaLabel}
+      >
+        <label className="close-toggle-control">
+          <input
+            type="checkbox"
+            className="close-toggle-input"
+            checked={closeOnApply}
+            onChange={(event) => handleCloseToggle(event.target.checked)}
+            aria-label={t.closeOnApply.ariaLabel}
+          />
+          <span className="close-toggle-switch" aria-hidden="true" />
+          <span className="close-toggle-desc">
+            {t.closeOnApply.description}
+          </span>
+        </label>
+      </div>
       <button
         type="button"
         className="lang-toggle"
