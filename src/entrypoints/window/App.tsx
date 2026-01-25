@@ -35,6 +35,7 @@ type StatusState = {
 type Language = "zh" | "en";
 
 const CLOSE_ON_APPLY_KEY = "closeOnApply";
+const RESIZER_WINDOW_ID_KEY = "resizerWindowId";
 
 const ratioOptionDefinitions: RatioOptionDefinition[] = [
   { value: "free", ratio: null, labelKey: "free" },
@@ -261,6 +262,48 @@ function App() {
       }
     };
     void load();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const ensureSingleWindow = async () => {
+      try {
+        if (!browser?.storage?.local || !browser?.windows?.getCurrent) return;
+        const currentWindow = await browser.windows.getCurrent();
+        const currentId = currentWindow?.id;
+        if (!currentId) return;
+
+        const stored = await browser.storage.local.get(RESIZER_WINDOW_ID_KEY);
+        const storedId =
+          typeof stored[RESIZER_WINDOW_ID_KEY] === "number"
+            ? stored[RESIZER_WINDOW_ID_KEY]
+            : null;
+
+        if (storedId && storedId !== currentId) {
+          try {
+            await browser.windows.update(storedId, { focused: true });
+            if (!active) return;
+            window.close();
+            return;
+          } catch (error) {
+            console.warn("Failed to focus existing resizer window", error);
+          }
+        }
+
+        if (storedId !== currentId) {
+          await browser.storage.local.set({
+            [RESIZER_WINDOW_ID_KEY]: currentId,
+          });
+        }
+      } catch (error) {
+        console.warn("Failed to enforce single resizer window", error);
+      }
+    };
+
+    void ensureSingleWindow();
     return () => {
       active = false;
     };
