@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/coderPerseus/window-resizer-plus/compare/wxt-react-starter-v1.3.0...wxt-react-starter-v1.4.0) (2026-01-31)
+
+
+### Features
+
+* remove 'windows' permission from manifest ([16f848a](https://github.com/coderPerseus/window-resizer-plus/commit/16f848a8643983b6bb2edd1d92ba2e4f9441c9e7))
+
 ## [1.3.0](https://github.com/coderPerseus/window-resizer-plus/compare/wxt-react-starter-v1.2.0...wxt-react-starter-v1.3.0) (2026-01-25)
 
 
